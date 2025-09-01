@@ -1,0 +1,140 @@
+package net.sam.ping_system.client.overlay;
+
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.sam.ping_system.PingSystem;
+import net.sam.ping_system.networking.ModPackets;
+import net.sam.ping_system.networking.packets.C2SRequestToPingPacket;
+import net.sam.ping_system.render.CustomHudRenderer;
+import net.sam.ping_system.util.PartialTickUtils;
+import org.joml.Matrix4f;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Mod.EventBusSubscriber(modid = PingSystem.MOD_ID, value = Dist.CLIENT)
+public class PingHandler {
+
+    private static final ResourceLocation BASIC_PING = new ResourceLocation(PingSystem.MOD_ID, "textures/client/basic.png");
+    private static final ResourceLocation MOVE_PING = new ResourceLocation(PingSystem.MOD_ID, "textures/client/move.png");
+    private static final ResourceLocation ATTACK_PING = new ResourceLocation(PingSystem.MOD_ID, "textures/client/attack.png");
+    private static final ResourceLocation DANGER_PING = new ResourceLocation(PingSystem.MOD_ID, "textures/client/danger.png");
+    private static final ResourceLocation BREAK_PING = new ResourceLocation(PingSystem.MOD_ID, "textures/client/break.png");
+
+    private static final ResourceLocation PING_0 = new ResourceLocation(PingSystem.MOD_ID, "textures/client/ping_0.png");
+    private static final ResourceLocation PING_1 = new ResourceLocation(PingSystem.MOD_ID, "textures/client/ping_1.png");
+    private static final ResourceLocation PING_2 = new ResourceLocation(PingSystem.MOD_ID, "textures/client/ping_2.png");
+    private static final ResourceLocation PING_3 = new ResourceLocation(PingSystem.MOD_ID, "textures/client/ping_3.png");
+    private static final ResourceLocation PING_4 = new ResourceLocation(PingSystem.MOD_ID, "textures/client/ping_4.png");
+
+    private static final double distance = 512.0;
+    private static double timeSinceLastPing = 0.0;
+    private static final double pingCooldown = 12.0; //in ticks
+
+    public static List<Ping> pingList = new ArrayList<>();
+
+    private static float edgePixels = 10.0f;
+
+    public static void newPing(int playerId, int type, double x, double y, double z){
+        Ping ping = new Ping(playerId,type,x,y,z);
+        pingList.add(ping);
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event){
+        List<Ping> temp = new ArrayList<>();
+        for(Ping f : pingList){
+            if(!f.update()){
+                temp.add(f);
+            }
+        }
+        pingList = temp;
+    }
+
+    @SubscribeEvent
+    public static void onRenderGui(RenderGuiEvent.Pre event) {
+
+        for(Ping p : pingList){
+            p.tick();
+            Vec3 pos = new Vec3(p.x, p.y, p.z);
+            Vec2 screenRenderPos = CustomHudRenderer.worldToScreenWithEdgeClip(pos, 0);
+
+            float x = screenRenderPos.x;
+            float y = screenRenderPos.y;
+            if(p.type == 1){
+                CustomHudRenderer.renderCustomHudObject(PING_1,x, y, 12,12,1,0,255,255,255,255);
+                CustomHudRenderer.renderCustomHudObject(MOVE_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+            } else if (p.type == 2) {
+                CustomHudRenderer.renderCustomHudObject(PING_2,x, y, 12,12,1,0,255,255,255,255);
+                CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+            }else if (p.type == 3) {
+                CustomHudRenderer.renderCustomHudObject(PING_3,x, y, 12,12,1,0,255,255,255,255);
+                CustomHudRenderer.renderCustomHudObject(DANGER_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+            }else if (p.type == 4) {
+                CustomHudRenderer.renderCustomHudObject(PING_4,x, y, 12,12,1,0,255,255,255,255);
+                CustomHudRenderer.renderCustomHudObject(BREAK_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+            }else{
+                CustomHudRenderer.renderCustomHudObject(PING_0,x, y, 12,12,1,0,255,255,255,255);
+                CustomHudRenderer.renderCustomHudObject(BASIC_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+            }
+
+        }
+    }
+    @SubscribeEvent
+    public static void updateCooldown(RenderGuiEvent.Pre event){
+        if (timeSinceLastPing < pingCooldown){
+            timeSinceLastPing += PartialTickUtils.timeDif;
+        }
+    }
+
+    public static void sendPing(int type){
+
+        if(!(timeSinceLastPing >= pingCooldown)){
+            return;
+        }
+        timeSinceLastPing = 0.0;
+        Minecraft mc = Minecraft.getInstance();
+        Player player = mc.player;
+        Vec3 start = player.getEyePosition(1.0F);
+        Vec3 look = player.getViewVector(1.0F);
+        Vec3 end = start.add(look.scale(distance));
+        BlockHitResult hitResult = player.level().clip(new ClipContext(
+                start,
+                end,
+                ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE,
+                player
+        ));
+
+        if(hitResult.getType() == HitResult.Type.MISS){return;}
+        else{
+            BlockPos blockPos = hitResult.getBlockPos();
+            Vec3 pos = hitResult.getLocation();
+            double x = pos.x();
+            double y = pos.y();
+            double z = pos.z();
+            System.out.println(String.format("x: %f, y: %f, z: %f", x,y,z));
+            ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, x, y, z, blockPos));
+        }
+    }
+}
