@@ -33,9 +33,10 @@ public class CustomHudRenderer {
         PoseStack poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate(x, y, 0);
+        poseStack.mulPose(Axis.ZP.rotation(rotationDeg * (float)(Math.PI/180)));
         poseStack.translate(-(width) / 2, -(height) / 2, 0);
         poseStack.scale(scale, scale, 1);
-        poseStack.mulPose(Axis.ZP.rotation(rotationDeg * (float)(Math.PI/180)));
+
 
         RenderSystem.disableCull();
         RenderSystem.enableBlend();
@@ -196,27 +197,22 @@ public class CustomHudRenderer {
 
         float ndcX, ndcY;
 
+        // Normal perspective divide
+        ndcX = pos.x / pos.w;
+        ndcY = pos.y / pos.w;
+
+        float scale = 1.0f / Math.max(Math.abs(ndcX) / edgeFracX, Math.abs(ndcY) / edgeFracY);
         if(pos.w <= 0){
-            ndcX = pos.x / Math.abs(pos.w);
-            ndcY = pos.y / Math.abs(pos.w);
-
-            float maxComponent = Math.max(Math.abs(ndcX), Math.abs(ndcY));
-            ndcX = (ndcX / maxComponent) * edgeFracX; // Scale down slightly to stay within bounds
-            ndcY = (ndcY / maxComponent) * edgeFracY;
-
-        }else{
-            // Normal perspective divide
-            ndcX = pos.x / pos.w;
-            ndcY = pos.y / pos.w;
-
-            // Check if point is outside the view frustum and clamp to edge
-            if (Math.abs(ndcX) > edgeFracX || Math.abs(ndcY) > edgeFracY) {
-                // Point is outside view frustum - project to screen edge
-                float scale = 1.0f / Math.max(Math.abs(ndcX) / edgeFracX, Math.abs(ndcY) / edgeFracY);
-                ndcX *= scale;
-                ndcY *= scale;
-            }
+            ndcX *= -scale;
+            ndcY *= -scale;
         }
+
+        // Check if point is outside the view frustum and clamp to edge
+        else if (Math.abs(ndcX) > edgeFracX || Math.abs(ndcY) > edgeFracY) {
+            ndcX *= scale;
+            ndcY *= scale;
+        }
+
         ndcX = Mth.clamp(ndcX, -edgeFracX, edgeFracX);
         ndcY = Mth.clamp(ndcY, -edgeFracY, edgeFracY);
 
