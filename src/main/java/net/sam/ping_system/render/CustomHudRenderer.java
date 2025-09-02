@@ -87,56 +87,9 @@ public class CustomHudRenderer {
         poseStack.popPose();
     }
 
-    public static Vec2 worldToScreen(Vec3 worldPos) {
+    public static Vec2 worldToScreen(Vector4f pos) {
+
         Minecraft mc = Minecraft.getInstance();
-        Camera camera = mc.gameRenderer.getMainCamera();
-
-        // Get camera position
-        Vec3 camPos = camera.getPosition();
-
-        // Calculate relative position
-        float relX = (float)(worldPos.x - camPos.x);
-        float relY = (float)(worldPos.y - camPos.y);
-        float relZ = (float)(worldPos.z - camPos.z);
-
-        // Create view matrix using lookAt approach
-        Matrix4f viewMatrix = new Matrix4f();
-
-        // Get camera's forward, up, and right vectors from rotation
-        Quaternionf cameraRotation = camera.rotation();
-        Vector3f forward = new Vector3f(0, 0, 1);
-        Vector3f up = new Vector3f(0, 1, 0);
-        Vector3f right = new Vector3f(1, 0, 0);
-
-        // Apply camera rotation to get actual directions
-        cameraRotation.transform(forward);
-        cameraRotation.transform(up);
-        cameraRotation.transform(right);
-
-        // Create view matrix manually
-        viewMatrix.setLookAt(
-                0, 0, 0,
-                forward.x, forward.y, forward.z,
-                up.x, up.y, up.z
-        );
-
-        // Get projection matrix
-        Matrix4f projectionMatrix = new Matrix4f();
-
-
-        float aspectRatio = (float) mc.getWindow().getScreenWidth() / (float) mc.getWindow().getScreenHeight();
-        float nearPlane = 0.05f;
-        float farPlane = mc.gameRenderer.getRenderDistance() * 16.0f;
-        projectionMatrix.perspective((float) Math.toRadians(currentFov), aspectRatio, nearPlane, farPlane);
-
-        // Transform the relative position
-        Vector4f pos = new Vector4f(relX, relY, relZ, 1.0f);
-
-        // Apply view matrix
-        pos.mul(viewMatrix);
-
-        // Apply projection matrix
-        pos.mul(projectionMatrix);
         // Check if behind camera
         if (pos.w() <= 0.0f) {
             return null;
@@ -158,7 +111,28 @@ public class CustomHudRenderer {
         return new Vec2(screenX, screenY);
     }
 
-    public static Vec2 worldToScreenWithEdgeClip(Vec3 worldPos, int edgePixels) {
+    public static boolean isOffScreen(Vector4f pos, float edgePixels){
+        if (pos.w() <= 0.0f) {
+            return true;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        int screenWidth = mc.getWindow().getScreenWidth();
+        int screenHeight = mc.getWindow().getScreenHeight();
+        float edgeFracX = (screenWidth - edgePixels) / screenWidth;
+        float edgeFracY = (screenHeight - edgePixels) / screenHeight;
+
+        float ndcX, ndcY;
+        ndcX = pos.x / pos.w;
+        ndcY = pos.y / pos.w;
+
+        // Check if point is outside the view frustum
+        if (Math.abs(ndcX) > edgeFracX || Math.abs(ndcY) > edgeFracY) {
+            return true;
+        }
+        return false;
+    }
+
+    public static Vector4f worldToScreenTransform(Vec3 worldPos){
         Minecraft mc = Minecraft.getInstance();
         Camera camera = mc.gameRenderer.getMainCamera();
 
@@ -208,6 +182,18 @@ public class CustomHudRenderer {
 
         // Apply projection matrix
         pos.mul(projectionMatrix);
+        return pos;
+    }
+
+    public static Vec2 worldToScreenWithEdgeClip(Vector4f pos, float edgePixels) {
+        Minecraft mc = Minecraft.getInstance();
+
+        int screenWidth = mc.getWindow().getScreenWidth();
+        int screenHeight = mc.getWindow().getScreenHeight();
+
+        float edgeFracX = (screenWidth - edgePixels) / screenWidth;
+        float edgeFracY = (screenHeight - edgePixels) / screenHeight;
+
         float ndcX, ndcY;
 
         if(pos.w <= 0){
@@ -215,8 +201,8 @@ public class CustomHudRenderer {
             ndcY = pos.y / Math.abs(pos.w);
 
             float maxComponent = Math.max(Math.abs(ndcX), Math.abs(ndcY));
-            ndcX = (ndcX / maxComponent) * 1.0f; // Scale down slightly to stay within bounds
-            ndcY = (ndcY / maxComponent) * 1.0f;
+            ndcX = (ndcX / maxComponent) * edgeFracX; // Scale down slightly to stay within bounds
+            ndcY = (ndcY / maxComponent) * edgeFracY;
 
         }else{
             // Normal perspective divide
@@ -224,21 +210,18 @@ public class CustomHudRenderer {
             ndcY = pos.y / pos.w;
 
             // Check if point is outside the view frustum and clamp to edge
-            if (Math.abs(ndcX) > 1.0f || Math.abs(ndcY) > 1.0f) {
+            if (Math.abs(ndcX) > edgeFracX || Math.abs(ndcY) > edgeFracY) {
                 // Point is outside view frustum - project to screen edge
-                float maxComponent = Math.max(Math.abs(ndcX), Math.abs(ndcY));
-                ndcX = (ndcX / maxComponent) * 1.0f; // Scale down slightly to stay within bounds
-                ndcY = (ndcY / maxComponent) * 1.0f;
+                float scale = 1.0f / Math.max(Math.abs(ndcX) / edgeFracX, Math.abs(ndcY) / edgeFracY);
+                ndcX *= scale;
+                ndcY *= scale;
             }
         }
-        ndcX = Mth.clamp(ndcX, -1f, 1f);
-        ndcY = Mth.clamp(ndcY, -1f, 1f);
+        ndcX = Mth.clamp(ndcX, -edgeFracX, edgeFracX);
+        ndcY = Mth.clamp(ndcY, -edgeFracY, edgeFracY);
 
 
         // Convert normalized device coordinates to screen coordinates
-        int screenWidth = mc.getWindow().getScreenWidth() - edgePixels;
-        int screenHeight = mc.getWindow().getScreenHeight() - edgePixels;
-
         float guiInverseScale = 1.0f/(float) Minecraft.getInstance().getWindow().getGuiScale(); // e.g. 2.0
 
         float screenX = (ndcX * 0.5f + 0.5f) * screenWidth * guiInverseScale;
