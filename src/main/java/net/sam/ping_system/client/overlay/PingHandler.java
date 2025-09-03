@@ -58,6 +58,8 @@ public class PingHandler {
     private static final double distance = 512.0;
     private static double timeSinceLastPing = 0.0;
     private static final double pingCooldown = 12.0; //in ticks
+    private static final float fadeRadius = 0.5f;
+    private static final float fadeMin = 0.1f;
 
     private static int centerX = 0;
     private static int centerY = 0;
@@ -99,9 +101,9 @@ public class PingHandler {
             float y = screenRenderPos.y;
             if(isEdge){
 
-                float distLeft   = x;
+                float distLeft = x;
                 float distRight  = Minecraft.getInstance().getWindow().getGuiScaledWidth() - x;
-                float distTop    = y;
+                float distTop = y;
                 float distBottom = Minecraft.getInstance().getWindow().getGuiScaledHeight() - y;
 
                 // Find nearest edge
@@ -117,42 +119,53 @@ public class PingHandler {
                     arrowRotation = 270f; // Left
                 }
 
-                System.out.println(arrowRotation);
-                float tempDistance = 16f;
-                float distX = tempDistance * -Mth.sin(arrowRotation * (Mth.PI/180));
-                float distY = tempDistance * Mth.cos(arrowRotation * (Mth.PI/180));
+                float offset = 16f;
+                float offsetX = offset * -Mth.sin(arrowRotation * (Mth.PI/180));
+                float offsetY = offset * Mth.cos(arrowRotation * (Mth.PI/180));
+
                 if(p.type == 1){
                     CustomHudRenderer.renderCustomHudObject(ARROW_1,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(MOVE_PING,x + distX, y + distY, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(MOVE_PING,x + offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 } else if (p.type == 2) {
                     CustomHudRenderer.renderCustomHudObject(ARROW_2,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x+ distX, y + distY, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 }else if (p.type == 3) {
                     CustomHudRenderer.renderCustomHudObject(ARROW_3,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(DANGER_PING,x+ distX, y + distY, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(DANGER_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 }else if (p.type == 4) {
                     CustomHudRenderer.renderCustomHudObject(ARROW_4,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(BREAK_PING,x+ distX, y + distY, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(BREAK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 }else{
                     CustomHudRenderer.renderCustomHudObject(ARROW_0,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ distX, y + distY, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,-arrowRotation,255,255,255,255);
                 }
             }else{
+
+                float xRel = centerX - x;
+                float yRel = centerY - y;
+                float length = (Mth.sqrt(centerX * centerX + centerY * centerY));
+                float dist = Mth.sqrt(xRel * xRel + yRel * yRel) / fadeRadius;
+                float opacity = 1 - ((length - dist) / (length));
+                System.out.println(opacity);
+                opacity = Mth.clamp(opacity, fadeMin, 1);
+                System.out.println(opacity);
+                int alpha = (int)(opacity * 255);
+
                 if(p.type == 1){
-                    CustomHudRenderer.renderCustomHudObject(PING_1,x, y, 12,12,1,0,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(MOVE_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(PING_1,x, y, 12,12,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(MOVE_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
                 } else if (p.type == 2) {
-                    CustomHudRenderer.renderCustomHudObject(PING_2,x, y, 12,12,1,0,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(PING_2,x, y, 12,12,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
                 }else if (p.type == 3) {
-                    CustomHudRenderer.renderCustomHudObject(PING_3,x, y, 12,12,1,0,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(DANGER_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(PING_3,x, y, 12,12,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(DANGER_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
                 }else if (p.type == 4) {
-                    CustomHudRenderer.renderCustomHudObject(PING_4,x, y, 12,12,1,0,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(BREAK_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(PING_4,x, y, 12,12,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(BREAK_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
                 }else{
-                    CustomHudRenderer.renderCustomHudObject(PING_0,x, y, 12,12,1,0,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(BASIC_PING,x, y - 16f, 16,16,1,0,255,255,255,255);
+                    CustomHudRenderer.renderCustomHudObject(PING_0,x, y, 12,12,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(BASIC_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
                 }
             }
         }
