@@ -2,6 +2,7 @@ package net.sam.ping_system.networking;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.Team;
 import net.minecraftforge.network.NetworkEvent;
 import net.sam.ping_system.networking.packets.S2CSendPingPacket;
 
@@ -15,9 +16,13 @@ public class ServerPacketHandler {
         ServerPlayer sender = ctx.get().getSender();
         S2CSendPingPacket sendPingPacket = new S2CSendPingPacket(senderId, type, x, y, z, blockPos);
         List<ServerPlayer> players = sender.serverLevel().players();
-        System.out.println("Received c2s packet");
+        Team senderTeam = sender.getTeam();
+        System.out.println(senderTeam);
         for(ServerPlayer p: players){
-            ModPackets.sendToPlayer(p, sendPingPacket);
+            if(p.getTeam() == senderTeam || (p.getTeam() == null && senderTeam == null)){
+                ModPackets.sendToPlayer(p, sendPingPacket);
+            }
+
         }
     }
 }

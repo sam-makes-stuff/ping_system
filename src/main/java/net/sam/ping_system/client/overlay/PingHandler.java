@@ -58,8 +58,8 @@ public class PingHandler {
     private static final double distance = 512.0;
     private static double timeSinceLastPing = 0.0;
     private static final double pingCooldown = 12.0; //in ticks
-    private static final float fadeRadius = 0.5f;
-    private static final float fadeMin = 0.1f;
+    private static final float fadeRadius = 0.4f;
+    private static final float fadeMin = 0.04f;
 
     private static int centerX = 0;
     private static int centerY = 0;
@@ -137,7 +137,14 @@ public class PingHandler {
                     CustomHudRenderer.renderCustomHudObject(BREAK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 }else{
                     CustomHudRenderer.renderCustomHudObject(ARROW_0,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,-arrowRotation,255,255,255,255);
+                    if(arrowRotation == 0){
+                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,180,255,255,255,255);
+                    } else if (arrowRotation == 180) {
+                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
+                    }else {
+                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,-arrowRotation,255,255,255,255);
+                    }
+
                 }
             }else{
 
@@ -146,9 +153,7 @@ public class PingHandler {
                 float length = (Mth.sqrt(centerX * centerX + centerY * centerY));
                 float dist = Mth.sqrt(xRel * xRel + yRel * yRel) / fadeRadius;
                 float opacity = 1 - ((length - dist) / (length));
-                System.out.println(opacity);
                 opacity = Mth.clamp(opacity, fadeMin, 1);
-                System.out.println(opacity);
                 int alpha = (int)(opacity * 255);
 
                 if(p.type == 1){
@@ -203,7 +208,6 @@ public class PingHandler {
             double x = pos.x();
             double y = pos.y();
             double z = pos.z();
-            System.out.println(String.format("x: %f, y: %f, z: %f", x,y,z));
             ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, x, y, z, blockPos));
         }
     }
