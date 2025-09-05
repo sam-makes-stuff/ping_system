@@ -55,6 +55,9 @@ public class PingHandler {
     private static final ResourceLocation ARROW_3 = new ResourceLocation(PingSystem.MOD_ID, "textures/client/arrow_3.png");
     private static final ResourceLocation ARROW_4 = new ResourceLocation(PingSystem.MOD_ID, "textures/client/arrow_4.png");
 
+    private static final ResourceLocation PING_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/ping_outline.png");
+    private static final ResourceLocation ARROW_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/arrow_outline.png");
+
     private static final double distance = 512.0;
     private static double timeSinceLastPing = 0.0;
     private static final double pingCooldown = 12.0; //in ticks
@@ -68,8 +71,8 @@ public class PingHandler {
 
     private static float edgePixels = 128.0f;
 
-    public static void newPing(int playerId, int type, double x, double y, double z){
-        Ping ping = new Ping(playerId,type,x,y,z);
+    public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b){
+        Ping ping = new Ping(playerId,type,x,y,z,r,g,b);
         pingList.add(ping);
     }
 
@@ -146,6 +149,9 @@ public class PingHandler {
                     }
 
                 }
+
+                CustomHudRenderer.renderCustomHudObject(ARROW_OUTLINE,x, y, 12,12,1,arrowRotation,p.r,p.g,p.b,255);
+
             }else{
 
                 float xRel = centerX - x;
@@ -172,6 +178,7 @@ public class PingHandler {
                     CustomHudRenderer.renderCustomHudObject(PING_0,x, y, 12,12,1,0,255,255,255,alpha);
                     CustomHudRenderer.renderCustomHudObject(BASIC_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
                 }
+                CustomHudRenderer.renderCustomHudObject(PING_OUTLINE,x, y, 12,12,1,0,p.r,p.g,p.b,alpha);
             }
         }
     }

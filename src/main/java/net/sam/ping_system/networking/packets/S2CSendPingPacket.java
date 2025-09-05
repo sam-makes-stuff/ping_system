@@ -17,15 +17,21 @@ public class S2CSendPingPacket {
     private final double y;
     private final double z;
     private final BlockPos blockPos;
+    private final int r;
+    private final int g;
+    private final int b;
 
 
-    public S2CSendPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos) {
+    public S2CSendPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos,int r, int g, int b) {
         this.senderId = senderId;
         this.type = type;
         this.x = x;
         this.y = y;
         this.z = z;
         this.blockPos = blockPos;
+        this.r = r;
+        this.g = g;
+        this.b = b;
     }
 
     public static void encode(S2CSendPingPacket pkt, FriendlyByteBuf buf) {
@@ -35,17 +41,20 @@ public class S2CSendPingPacket {
         buf.writeDouble(pkt.y);
         buf.writeDouble(pkt.z);
         buf.writeBlockPos(pkt.blockPos);
+        buf.writeInt(pkt.r);
+        buf.writeInt(pkt.g);
+        buf.writeInt(pkt.b);
 
     }
 
     public static S2CSendPingPacket decode(FriendlyByteBuf buf) {
-        return new S2CSendPingPacket(buf.readInt(), buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBlockPos());
+        return new S2CSendPingPacket(buf.readInt(), buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBlockPos(), buf.readInt(), buf.readInt(), buf.readInt());
     }
 
     public static void handle(S2CSendPingPacket pkt, Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(() -> {
-                    ClientPacketHandler.handleS2CPingPacket(pkt.senderId, pkt.type, pkt.x, pkt.y, pkt.z, pkt.blockPos);
+                    ClientPacketHandler.handleS2CPingPacket(pkt.senderId, pkt.type, pkt.x, pkt.y, pkt.z, pkt.blockPos, pkt.r, pkt.g, pkt.b);
         });
         ctx.get().setPacketHandled(true);
     }
