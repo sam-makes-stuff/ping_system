@@ -203,8 +203,8 @@ public class PingHandler {
         BlockHitResult hitResult = player.level().clip(new ClipContext(
                 start,
                 end,
-                ClipContext.Block.COLLIDER,
-                ClipContext.Fluid.NONE,
+                ClipContext.Block.OUTLINE,
+                ClipContext.Fluid.ANY,
                 player
         ));
 
