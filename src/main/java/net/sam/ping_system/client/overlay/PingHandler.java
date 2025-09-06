@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
@@ -200,13 +201,32 @@ public class PingHandler {
         Vec3 start = player.getEyePosition(1.0F);
         Vec3 look = player.getViewVector(1.0F);
         Vec3 end = start.add(look.scale(distance));
-        BlockHitResult hitResult = player.level().clip(new ClipContext(
-                start,
-                end,
-                ClipContext.Block.OUTLINE,
-                ClipContext.Fluid.ANY,
-                player
-        ));
+
+        BlockHitResult hitResult;
+
+        //raycast to hit block, if player is in a liquid, ignore liquids
+        Vec3 eyePos = player.getEyePosition(1.0F);
+        BlockPos eyeBlockPos = BlockPos.containing(eyePos);
+        BlockState state = player.level().getBlockState(eyeBlockPos);
+        if(state.liquid()){
+            hitResult = player.level().clip(new ClipContext(
+                    start,
+                    end,
+                    ClipContext.Block.OUTLINE,
+                    ClipContext.Fluid.NONE,
+                    player
+            ));
+        }else{
+            hitResult = player.level().clip(new ClipContext(
+                    start,
+                    end,
+                    ClipContext.Block.OUTLINE,
+                    ClipContext.Fluid.ANY,
+                    player
+            ));
+        }
+
+
 
         if(hitResult.getType() == HitResult.Type.MISS){return;}
         else{
