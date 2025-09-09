@@ -119,12 +119,8 @@ public class CustomHudRenderer {
             poseStack.scale(scale, scale, 1.0f);
         }
 
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(1f, 1f, 1f, alpha/255f);
-        System.out.println(alpha/255f);
-        gg.renderItem(stack, 0,0);
 
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        gg.renderItem(stack, 0,0);
         RenderSystem.disableBlend();
 
         poseStack.popPose();

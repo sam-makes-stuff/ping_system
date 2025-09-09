@@ -73,6 +73,7 @@ public class PingHandler {
     private static final double distance = 512.0;
     private static double timeSinceLastPing = 0.0;
     private static final double pingCooldown = 12.0; //in ticks
+    private static final int maxPings = 3;
     private static final float fadeRadius = 0.4f;
     private static final float fadeMin = 0.04f;
 
@@ -86,6 +87,9 @@ public class PingHandler {
     public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b, BlockPos blockPos, Team team){
         Ping ping = new Ping(playerId,type,x,y,z,r,g,b, blockPos, team);
         pingList.add(ping);
+        if(pingList.size() > maxPings){
+            pingList.remove(0);
+        }
     }
 
     @SubscribeEvent
