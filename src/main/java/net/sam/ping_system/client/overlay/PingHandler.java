@@ -8,16 +8,20 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.Team;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -59,6 +63,13 @@ public class PingHandler {
     private static final ResourceLocation PING_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/ping_outline.png");
     private static final ResourceLocation ARROW_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/arrow_outline.png");
 
+    private static final ResourceLocation BASIC_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/basic_outline.png");
+    private static final ResourceLocation DANGER_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/danger_outline.png");
+    private static final ResourceLocation MOVE_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/move_outline.png");
+    private static final ResourceLocation BREAK_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/break_outline.png");
+    private static final ResourceLocation ATTACK_OUTLINE = new ResourceLocation(PingSystem.MOD_ID, "textures/client/attack_outline.png");
+
+    private static final int PING_SIZE_PIXELS = 7;
     private static final double distance = 512.0;
     private static double timeSinceLastPing = 0.0;
     private static final double pingCooldown = 12.0; //in ticks
@@ -72,8 +83,8 @@ public class PingHandler {
 
     private static float edgePixels = 128.0f;
 
-    public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b){
-        Ping ping = new Ping(playerId,type,x,y,z,r,g,b);
+    public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b, BlockPos blockPos, Team team){
+        Ping ping = new Ping(playerId,type,x,y,z,r,g,b, blockPos, team);
         pingList.add(ping);
     }
 
@@ -90,7 +101,6 @@ public class PingHandler {
 
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Pre event) {
-
         centerX = Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2;
         centerY = Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2;
 
@@ -103,7 +113,7 @@ public class PingHandler {
 
             float x = screenRenderPos.x;
             float y = screenRenderPos.y;
-            if(isEdge){
+            if(isEdge){ //if off-screen
 
                 float distLeft = x;
                 float distRight  = Minecraft.getInstance().getWindow().getGuiScaledWidth() - x;
@@ -127,59 +137,79 @@ public class PingHandler {
                 float offsetX = offset * -Mth.sin(arrowRotation * (Mth.PI/180));
                 float offsetY = offset * Mth.cos(arrowRotation * (Mth.PI/180));
 
+                CustomHudRenderer.renderItemSprite(p.blockStack, x + offsetX,y + offsetY, 1.0f, 0.0f, 255);
                 if(p.type == 1){
                     CustomHudRenderer.renderCustomHudObject(ARROW_1,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(MOVE_PING,x + offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
+                    //CustomHudRenderer.renderCustomHudObject(MOVE_PING,x + offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 } else if (p.type == 2) {
                     CustomHudRenderer.renderCustomHudObject(ARROW_2,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
+                    //CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 }else if (p.type == 3) {
                     CustomHudRenderer.renderCustomHudObject(ARROW_3,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(DANGER_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
+                    //CustomHudRenderer.renderCustomHudObject(DANGER_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 }else if (p.type == 4) {
                     CustomHudRenderer.renderCustomHudObject(ARROW_4,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    CustomHudRenderer.renderCustomHudObject(BREAK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
+                    //CustomHudRenderer.renderCustomHudObject(BREAK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 }else{
                     CustomHudRenderer.renderCustomHudObject(ARROW_0,x, y, 12,12,1,arrowRotation,255,255,255,255);
-                    if(arrowRotation == 0){
-                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,180,255,255,255,255);
-                    } else if (arrowRotation == 180) {
-                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
-                    }else {
-                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,-arrowRotation,255,255,255,255);
-                    }
+//                    if(arrowRotation == 0){
+//                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,180,255,255,255,255);
+//                    } else if (arrowRotation == 180) {
+//                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
+//                    }else {
+//                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,-arrowRotation,255,255,255,255);
+//                    }
 
                 }
-
                 CustomHudRenderer.renderCustomHudObject(ARROW_OUTLINE,x, y, 12,12,1,arrowRotation,p.r,p.g,p.b,255);
 
-            }else{
 
-                float xRel = centerX - x;
-                float yRel = centerY - y;
-                float length = (Mth.sqrt(centerX * centerX + centerY * centerY));
-                float dist = Mth.sqrt(xRel * xRel + yRel * yRel) / fadeRadius;
-                float opacity = 1 - ((length - dist) / (length));
-                opacity = Mth.clamp(opacity, fadeMin, 1);
-                int alpha = (int)(opacity * 255);
+            }else{ //if on screen
 
+//                float xRel = centerX - x;
+//                float yRel = centerY - y;
+//                float length = (Mth.sqrt(centerX * centerX + centerY * centerY));
+//                float dist = Mth.sqrt(xRel * xRel + yRel * yRel) / fadeRadius;
+//                float opacity = 1 - ((length - dist) / (length));
+//                opacity = Mth.clamp(opacity, fadeMin, 1);
+//                int alpha = (int)(opacity * 255);
+                int alpha = 255;
+
+                CustomHudRenderer.renderItemSprite(p.blockStack, x + 16,y, 1.0f, 0.0f, alpha);
                 if(p.type == 1){
-                    CustomHudRenderer.renderCustomHudObject(PING_1,x, y, 12,12,1,0,255,255,255,alpha);
-                    CustomHudRenderer.renderCustomHudObject(MOVE_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_1,x, y, PING_SIZE_PIXELS,PING_SIZE_PIXELS,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(MOVE_PING,x, y - 20f, 20,20,1,0,255,255,255,alpha);
+                    if(p.team != null){
+                        CustomHudRenderer.renderCustomHudObject(MOVE_OUTLINE,x, y - 20f, 22,22,1,0,p.r,p.g,p.b,alpha);
+                    }
                 } else if (p.type == 2) {
-                    CustomHudRenderer.renderCustomHudObject(PING_2,x, y, 12,12,1,0,255,255,255,alpha);
-                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_2,x, y, PING_SIZE_PIXELS,PING_SIZE_PIXELS,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x, y - 16f, 18,16,1,0,255,255,255,alpha);
+                    if(p.team != null){
+                        CustomHudRenderer.renderCustomHudObject(ATTACK_OUTLINE,x, y - 16f, 20,18,1,0,p.r,p.g,p.b,alpha);
+                    }
                 }else if (p.type == 3) {
-                    CustomHudRenderer.renderCustomHudObject(PING_3,x, y, 12,12,1,0,255,255,255,alpha);
-                    CustomHudRenderer.renderCustomHudObject(DANGER_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_3,x, y, PING_SIZE_PIXELS,PING_SIZE_PIXELS,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(DANGER_PING,x, y - 18f, 20,18,1,0,255,255,255,alpha);
+                    if(p.team != null){
+                        CustomHudRenderer.renderCustomHudObject(DANGER_OUTLINE,x, y - 18f, 22,20,1,0,p.r,p.g,p.b,alpha);
+                    }
                 }else if (p.type == 4) {
-                    CustomHudRenderer.renderCustomHudObject(PING_4,x, y, 12,12,1,0,255,255,255,alpha);
-                    CustomHudRenderer.renderCustomHudObject(BREAK_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_4,x, y, PING_SIZE_PIXELS,PING_SIZE_PIXELS,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(BREAK_PING,x, y - 13f, 13,13,1,0,255,255,255,alpha);
+                    if(p.team != null){
+                        CustomHudRenderer.renderCustomHudObject(BREAK_OUTLINE,x, y - 13f, 15,15,1,0,p.r,p.g,p.b,alpha);
+                    }
                 }else{
-                    CustomHudRenderer.renderCustomHudObject(PING_0,x, y, 12,12,1,0,255,255,255,alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_0,x, y, PING_SIZE_PIXELS,PING_SIZE_PIXELS,1,0,255,255,255,alpha);
                     CustomHudRenderer.renderCustomHudObject(BASIC_PING,x, y - 16f, 16,16,1,0,255,255,255,alpha);
+                    if(p.team != null){
+                        CustomHudRenderer.renderCustomHudObject(BASIC_OUTLINE,x, y - 16f, 18,18,1,0,p.r,p.g,p.b,alpha);
+                    }
                 }
-                CustomHudRenderer.renderCustomHudObject(PING_OUTLINE,x, y, 12,12,1,0,p.r,p.g,p.b,alpha);
+                if(p.team != null){
+                    CustomHudRenderer.renderCustomHudObject(PING_OUTLINE,x, y, PING_SIZE_PIXELS + 2,PING_SIZE_PIXELS + 2,1,0,p.r,p.g,p.b,alpha);
+                }
             }
         }
     }

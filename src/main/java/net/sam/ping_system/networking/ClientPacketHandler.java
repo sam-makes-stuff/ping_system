@@ -50,6 +50,6 @@ public class ClientPacketHandler {
             player.sendSystemMessage(Component.literal(message).withStyle(teamColor));
         }
 
-        PingHandler.newPing(senderId, type, x,y,z,r,g,b);
+        PingHandler.newPing(senderId, type, x,y,z,r,g,b, blockPos, team);
     }
 }

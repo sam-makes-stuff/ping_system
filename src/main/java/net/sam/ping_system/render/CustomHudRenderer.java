@@ -1,6 +1,7 @@
 package net.sam.ping_system.render;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
@@ -9,8 +10,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -85,6 +94,39 @@ public class CustomHudRenderer {
         poseStack.mulPose(Axis.ZP.rotation(rotationDeg * (float)(Math.PI/180)));
         poseStack.scale(size, size, 1.0f);
         guiGraphics.drawString(font, text, -textWidth / 2, -textHeight / 2, color, true);
+        poseStack.popPose();
+    }
+
+    public static void renderItemSprite(ItemStack stack, float x, float y, float scale, float rotationDeg, int alpha) {
+        Minecraft mc = Minecraft.getInstance();
+        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
+        GuiGraphics gg = new GuiGraphics(mc, buffers);
+
+        PoseStack poseStack = gg.pose();
+
+        // Apply transformations
+
+        poseStack.translate(x, y, 0);
+        poseStack.translate(-8, -8, 0);
+
+        if (rotationDeg != 0) {
+            poseStack.translate(8, 8, 0);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(rotationDeg));
+            poseStack.translate(-8, -8, 0);
+        }
+
+        if (scale != 1.0f) {
+            poseStack.scale(scale, scale, 1.0f);
+        }
+
+        RenderSystem.enableBlend();
+        RenderSystem.setShaderColor(1f, 1f, 1f, alpha/255f);
+        System.out.println(alpha/255f);
+        gg.renderItem(stack, 0,0);
+
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        RenderSystem.disableBlend();
+
         poseStack.popPose();
     }
 
@@ -238,6 +280,4 @@ public class CustomHudRenderer {
                 ((g) << 8)  |
                 ((b));
     }
-
-
 }
