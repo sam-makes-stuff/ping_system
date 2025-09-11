@@ -100,9 +100,9 @@ public class PingHandler {
 
         int selectedPing = -1;
 
-        for(Ping f : pingList){
-            if(!f.update()){
-                temp.add(f);
+        for(Ping p : pingList){
+            if(!p.update() && !p.toRemove){
+                temp.add(p);
             }
         }
 
@@ -180,13 +180,6 @@ public class PingHandler {
                     //CustomHudRenderer.renderCustomHudObject(BREAK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 }else{
                     CustomHudRenderer.renderCustomHudObject(ARROW_0,x, y, 12,12,1,arrowRotation,255,255,255,255);
-//                    if(arrowRotation == 0){
-//                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,180,255,255,255,255);
-//                    } else if (arrowRotation == 180) {
-//                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
-//                    }else {
-//                        CustomHudRenderer.renderCustomHudObject(BASIC_PING,x+ offsetX, y + offsetY, 16,16,1,-arrowRotation,255,255,255,255);
-//                    }
 
                 }
                 CustomHudRenderer.renderCustomHudObject(ARROW_OUTLINE,x, y, 12,12,1,arrowRotation,p.r,p.g,p.b,255);
@@ -194,13 +187,6 @@ public class PingHandler {
 
             }else{ //if on screen
 
-//                float xRel = centerX - x;
-//                float yRel = centerY - y;
-//                float length = (Mth.sqrt(centerX * centerX + centerY * centerY));
-//                float dist = Mth.sqrt(xRel * xRel + yRel * yRel) / fadeRadius;
-//                float opacity = 1 - ((length - dist) / (length));
-//                opacity = Mth.clamp(opacity, fadeMin, 1);
-//                int alpha = (int)(opacity * 255);
                 int alpha = 255;
 
                 CustomHudRenderer.renderItemSprite(p.blockStack, x + 16,y, 1.0f, 0.0f, alpha);
@@ -258,6 +244,11 @@ public class PingHandler {
         }
     }
 
+    public static void removePing(int playerId, int type, double x, double y, double z){
+        BlockPos temp = new BlockPos(0,0,0);
+        ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true));
+    }
+
     public static void sendPing(int type){
 
         if(!(timeSinceLastPing >= pingCooldown)){
@@ -303,7 +294,7 @@ public class PingHandler {
             double x = pos.x();
             double y = pos.y();
             double z = pos.z();
-            ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, x, y, z, blockPos));
+            ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, x, y, z, blockPos, false));
         }
     }
 }

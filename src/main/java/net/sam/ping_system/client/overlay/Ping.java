@@ -19,6 +19,7 @@ public class Ping{
     public int g;
     public int b;
     public boolean isSelected;
+    public boolean toRemove = false;
     public Team team;
 
     private BlockPos blockPos;

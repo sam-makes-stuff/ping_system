@@ -101,9 +101,34 @@ public class PingWheelOverlay {
     }
 
     public static void openWheel(){
-        pingWheelShowing = true;
-        Minecraft mc = Minecraft.getInstance();
-        mc.mouseHandler.releaseMouse();
-//        mc.player.sendSystemMessage(Component.literal("open ping wheel"));
+
+        int selectedPingInd = -1;
+        int i = 0;
+        for(Ping p : PingHandler.pingList){
+            if(p.isSelected){
+                selectedPingInd = i;
+                break;
+            }
+            i += 1;
+        }
+
+        if(selectedPingInd != -1){
+            Ping selectedPing = PingHandler.pingList.get(selectedPingInd);
+
+            //players can only remove their own pings
+            if(selectedPing.playerId == Minecraft.getInstance().player.getId()){
+                PingHandler.removePing(selectedPing.playerId, selectedPing.type, selectedPing.x, selectedPing.y, selectedPing.z);
+            }else{
+                return;
+            }
+
+
+        }else {
+            pingWheelShowing = true;
+            Minecraft mc = Minecraft.getInstance();
+            mc.mouseHandler.releaseMouse();
+        }
+
+
     }
 }

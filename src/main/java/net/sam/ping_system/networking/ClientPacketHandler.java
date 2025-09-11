@@ -18,10 +18,25 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.sam.ping_system.client.overlay.Ping;
 import net.sam.ping_system.client.overlay.PingHandler;
 
 public class ClientPacketHandler {
-    public static void handleS2CPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, int r, int g, int b) {
+    public static void handleS2CPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, int r, int g, int b, boolean isRemove) {
+
+
+        //if remove ping packet
+        if(isRemove){
+            for(Ping p: PingHandler.pingList){
+                if(p.playerId == senderId && p.type == type && p.x == x && p.y == y && p.z == z){
+                    p.toRemove = true;
+                    return;
+                }
+            }
+            return;
+        }
+
+        //if normal ping packet
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         Level level = mc.player.level();
