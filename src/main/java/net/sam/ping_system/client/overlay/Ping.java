@@ -18,6 +18,7 @@ public class Ping{
     public int r;
     public int g;
     public int b;
+    public boolean isSelected;
     public Team team;
 
     private BlockPos blockPos;
@@ -38,6 +39,7 @@ public class Ping{
         this.b = b;
         this.blockPos = blockPos;
         this.team = team;
+        this.isSelected = false;
 
         Minecraft mc = Minecraft.getInstance();
         Block block = mc.player.level().getBlockState(blockPos).getBlock();

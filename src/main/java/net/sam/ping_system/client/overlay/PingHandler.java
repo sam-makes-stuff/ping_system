@@ -77,6 +77,8 @@ public class PingHandler {
     private static final float fadeRadius = 0.4f;
     private static final float fadeMin = 0.04f;
 
+    private static final float selectRadius = 25;
+
     private static int centerX = 0;
     private static int centerY = 0;
 
@@ -95,11 +97,15 @@ public class PingHandler {
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event){
         List<Ping> temp = new ArrayList<>();
+
+        int selectedPing = -1;
+
         for(Ping f : pingList){
             if(!f.update()){
                 temp.add(f);
             }
         }
+
         pingList = temp;
     }
 
@@ -107,6 +113,11 @@ public class PingHandler {
     public static void onRenderGui(RenderGuiEvent.Pre event) {
         centerX = Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2;
         centerY = Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2;
+
+
+        int i = 0;
+        int selected = -1;
+        float minDist = Float.POSITIVE_INFINITY;
 
         for(Ping p : pingList){
             p.tick();
@@ -117,6 +128,19 @@ public class PingHandler {
 
             float x = screenRenderPos.x;
             float y = screenRenderPos.y;
+
+            float xRel = centerX - x;
+            float yRel = centerY - y;
+            float dist = Mth.sqrt(xRel * xRel + yRel * yRel) * (float)(Minecraft.getInstance().getWindow().getGuiScale());
+            if(dist <= selectRadius){
+                if(dist < minDist){
+                    minDist = dist;
+                    selected = i;
+                }
+            }
+            i += 1;
+
+
             if(isEdge){ //if off-screen
 
                 float distLeft = x;
@@ -214,8 +238,18 @@ public class PingHandler {
                 if(p.team != null){
                     CustomHudRenderer.renderCustomHudObject(PING_OUTLINE,x, y, PING_SIZE_PIXELS + 2,PING_SIZE_PIXELS + 2,1,0,p.r,p.g,p.b,alpha);
                 }
+
+                if(p.isSelected){
+                    CustomHudRenderer.renderCustomHudObject(PING_OUTLINE,x, y, PING_SIZE_PIXELS + 2,PING_SIZE_PIXELS + 2,1,0.0f, 255,255,255,255);
+                }
             }
         }
+        pingList.forEach((p) -> p.isSelected = false);
+        if(selected != -1){
+            pingList.get(selected).isSelected = true;
+        }
+
+
     }
     @SubscribeEvent
     public static void updateCooldown(RenderGuiEvent.Pre event){
