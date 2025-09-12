@@ -13,6 +13,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.sam.ping_system.config.ClientConfig;
 import net.sam.ping_system.networking.ModPackets;
+import net.sam.ping_system.sound.ModSounds;
 import org.slf4j.Logger;
 
 @Mod(PingSystem.MOD_ID)
@@ -25,6 +26,8 @@ public class PingSystem
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         IEventBus forgeEventBus = MinecraftForge.EVENT_BUS;
+
+        ModSounds.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);

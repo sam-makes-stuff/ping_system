@@ -1,0 +1,26 @@
+{
+  "danger": {
+    "sounds": [
+      {
+        "name": "ping_system:custom/danger",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "break": {
+    "sounds": [
+      {
+        "name": "ping_system:custom/break",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "go": {
+    "sounds": [
+      {
+        "name": "ping_system:custom/go",
+        "attenuation_distance": 32
+      }
+    ]
+  }
+}
