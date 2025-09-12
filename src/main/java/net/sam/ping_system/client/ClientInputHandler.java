@@ -7,6 +7,8 @@ import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.sam.ping_system.PingSystem;
+import net.sam.ping_system.client.overlay.Ping;
+import net.sam.ping_system.client.overlay.PingHandler;
 import net.sam.ping_system.client.overlay.PingWheelOverlay;
 import org.lwjgl.glfw.GLFW;
 
@@ -33,7 +35,27 @@ public class ClientInputHandler {
                     mc.mouseHandler.releaseMouse();
                 }
                 else{
-                    PingWheelOverlay.openWheel();
+                    int selectedPingInd = -1;
+                    int i = 0;
+                    for(Ping p : PingHandler.pingList){
+                        if(p.isSelected){
+                            selectedPingInd = i;
+                            break;
+                        }
+                        i += 1;
+                    }
+                    if(selectedPingInd != -1){
+                        Ping selectedPing = PingHandler.pingList.get(selectedPingInd);
+
+                        //players can only remove their own pings
+                        if(selectedPing.playerId == Minecraft.getInstance().player.getId()){
+                            PingHandler.removePing(selectedPing.playerId, selectedPing.type, selectedPing.x, selectedPing.y, selectedPing.z);
+                        }else{
+                            return;
+                        }
+                    }else{
+                        PingWheelOverlay.openWheel();
+                    }
                 }
 
             }else if(action == GLFW.GLFW_RELEASE && PingWheelOverlay.pingWheelShowing){
