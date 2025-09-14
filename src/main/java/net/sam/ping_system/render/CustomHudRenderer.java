@@ -43,8 +43,9 @@ public class CustomHudRenderer {
         poseStack.pushPose();
         poseStack.translate(x, y, 0);
         poseStack.mulPose(Axis.ZP.rotation(rotationDeg * (float)(Math.PI/180)));
-        poseStack.translate(-(width) / 2, -(height) / 2, 0);
         poseStack.scale(scale, scale, 1);
+        poseStack.translate(-(width) / 2, -(height) / 2, 0);
+
 
 
         RenderSystem.disableCull();

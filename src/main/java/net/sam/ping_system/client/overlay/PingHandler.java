@@ -82,7 +82,10 @@ public class PingHandler {
     private static int centerX = 0;
     private static int centerY = 0;
 
+    private static int pingGhostAlpha = 50;
+
     public static List<Ping> pingList = new ArrayList<>();
+    public static List<PingGhost> pingGhostList = new ArrayList<>();
 
     private static float edgePixels = 128.0f;
 
@@ -94,19 +97,36 @@ public class PingHandler {
         }
     }
 
+    public static void newPingGhost(int type, double x, double y, double z, int r, int g, int b, Team team){
+        PingGhost pingGhost = new PingGhost(type,x,y,z,r,g,b, team);
+        pingGhostList.add(pingGhost);
+        if(pingList.size() > maxPings){
+            pingList.remove(0);
+        }
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event){
-        List<Ping> temp = new ArrayList<>();
+        List<Ping> tempPing = new ArrayList<>();
+        List<PingGhost> tempPingGhost = new ArrayList<>();
 
         int selectedPing = -1;
 
         for(Ping p : pingList){
             if(!p.update() && !p.toRemove){
-                temp.add(p);
+                tempPing.add(p);
             }
         }
 
-        pingList = temp;
+        for(PingGhost p : pingGhostList){
+            if(!p.toRemove){
+                tempPingGhost.add(p);
+            }
+        }
+
+
+        pingList = tempPing;
+        pingGhostList = tempPingGhost;
     }
 
     @SubscribeEvent
@@ -114,6 +134,30 @@ public class PingHandler {
         centerX = Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2;
         centerY = Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2;
 
+
+        for(PingGhost p: pingGhostList){
+            p.tick();
+            Vec3 pos = new Vec3(p.x, p.y, p.z);
+            Vector4f pos4f = CustomHudRenderer.worldToScreenTransform(pos);
+            Vec2 screenRenderPos = CustomHudRenderer.worldToScreenWithEdgeClip(pos4f, edgePixels);
+            boolean isEdge = CustomHudRenderer.isOffScreen(pos4f, edgePixels);
+
+            float x = screenRenderPos.x;
+            float y = screenRenderPos.y;
+
+            if(p.type == 1){
+                CustomHudRenderer.renderCustomHudObject(PING_1,x, y, PingGhost.baseSize, PingGhost.baseSize,p.sizeMult,0,255,255,255,pingGhostAlpha);
+            } else if (p.type == 2) {
+                CustomHudRenderer.renderCustomHudObject(PING_2,x, y, PingGhost.baseSize,PingGhost.baseSize,p.sizeMult,0,255,255,255,pingGhostAlpha);
+            }else if (p.type == 3) {
+                CustomHudRenderer.renderCustomHudObject(PING_3,x, y, PingGhost.baseSize,PingGhost.baseSize,p.sizeMult,0,255,255,255,pingGhostAlpha);
+            }else if (p.type == 4) {
+                CustomHudRenderer.renderCustomHudObject(PING_4,x, y, PingGhost.baseSize,PingGhost.baseSize,p.sizeMult,0,255,255,255,pingGhostAlpha);
+            }else{
+                CustomHudRenderer.renderCustomHudObject(PING_0,x, y, PingGhost.baseSize,PingGhost.baseSize,p.sizeMult,0,255,255,255,pingGhostAlpha);
+            }
+
+        }
 
         int i = 0;
         int selected = -1;
@@ -251,6 +295,12 @@ public class PingHandler {
     }
 
     public static void acknowledgePing(int playerId, int type, double x, double y, double z){
+
+        if(!(timeSinceLastPing >= pingCooldown)){
+            return;
+        }
+        timeSinceLastPing = 0.0;
+
         BlockPos temp = new BlockPos(0,0,0);
         System.out.println("acknowledge");
         ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, Minecraft.getInstance().player.getId()));

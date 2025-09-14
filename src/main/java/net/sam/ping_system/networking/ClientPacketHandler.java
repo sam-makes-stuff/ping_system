@@ -52,6 +52,8 @@ public class ClientPacketHandler {
 
                         //acknowledge ping
                     }else{
+                        PingHandler.newPingGhost(type, x,y,z,r,g,b, p.team);
+
                         PingSound ding = new PingSound(
                                 SoundEvents.NOTE_BLOCK_BELL.get(),
                                 SoundSource.PLAYERS,
@@ -59,6 +61,9 @@ public class ClientPacketHandler {
                                 x, y, z
                         );
                         Minecraft.getInstance().getSoundManager().play(ding);
+
+
+
                     }
                     return;
                 }
