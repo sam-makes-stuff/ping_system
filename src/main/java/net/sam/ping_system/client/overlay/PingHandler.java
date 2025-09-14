@@ -246,8 +246,16 @@ public class PingHandler {
 
     public static void removePing(int playerId, int type, double x, double y, double z){
         BlockPos temp = new BlockPos(0,0,0);
-        ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true));
+        System.out.println("remove");
+        ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, -1));
     }
+
+    public static void acknowledgePing(int playerId, int type, double x, double y, double z){
+        BlockPos temp = new BlockPos(0,0,0);
+        System.out.println("acknowledge");
+        ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, Minecraft.getInstance().player.getId()));
+    }
+
 
     public static void sendPing(int type){
 
@@ -294,7 +302,7 @@ public class PingHandler {
             double x = pos.x();
             double y = pos.y();
             double z = pos.z();
-            ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, x, y, z, blockPos, false));
+            ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, x, y, z, blockPos, false, -1));
         }
     }
 }

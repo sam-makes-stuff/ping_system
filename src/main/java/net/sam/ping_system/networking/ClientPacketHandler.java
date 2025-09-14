@@ -29,14 +29,37 @@ import net.sam.ping_system.sound.ModSounds;
 import net.sam.ping_system.sound.PingSound;
 
 public class ClientPacketHandler {
-    public static void handleS2CPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, int r, int g, int b, boolean isRemove) {
+    public static void handleS2CPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, int r, int g, int b, boolean isAlternative, int acknowledgerId) {
 
 
         //if remove ping packet
-        if(isRemove){
+        if(isAlternative){
             for(Ping p: PingHandler.pingList){
                 if(p.playerId == senderId && p.type == type && p.x == x && p.y == y && p.z == z){
-                    p.toRemove = true;
+                    if(acknowledgerId == -1){
+                        p.toRemove = true;
+                        if(Minecraft.getInstance().player.getId() == p.playerId){
+
+                            PingSound sound = new PingSound(
+                                    SoundEvents.UI_BUTTON_CLICK.get(),
+                                    SoundSource.PLAYERS,
+                                    0.1F, 2.0F,
+                                    x, y, z
+                            );
+                            Minecraft.getInstance().getSoundManager().play(sound);
+
+                        }
+
+                        //acknowledge ping
+                    }else{
+                        PingSound ding = new PingSound(
+                                SoundEvents.NOTE_BLOCK_BELL.get(),
+                                SoundSource.PLAYERS,
+                                0.3F, 1.0F,
+                                x, y, z
+                        );
+                        Minecraft.getInstance().getSoundManager().play(ding);
+                    }
                     return;
                 }
             }
@@ -113,9 +136,17 @@ public class ClientPacketHandler {
                     x, y, z
             );
         }
-
         mc.getSoundManager().play(sound);
 
 
+        if(senderId == mc.player.getId()){
+            PingSound click = new PingSound(
+                    SoundEvents.UI_BUTTON_CLICK.get(),
+                    SoundSource.PLAYERS,
+                    0.1F, 2.0F,
+                    x, y, z
+            );
+            mc.getSoundManager().play(click);
+        }
     }
 }

@@ -51,7 +51,7 @@ public class ClientInputHandler {
                         if(selectedPing.playerId == Minecraft.getInstance().player.getId()){
                             PingHandler.removePing(selectedPing.playerId, selectedPing.type, selectedPing.x, selectedPing.y, selectedPing.z);
                         }else{
-                            return;
+                            PingHandler.acknowledgePing(selectedPing.playerId, selectedPing.type, selectedPing.x, selectedPing.y, selectedPing.z);
                         }
                     }else{
                         PingWheelOverlay.openWheel();
