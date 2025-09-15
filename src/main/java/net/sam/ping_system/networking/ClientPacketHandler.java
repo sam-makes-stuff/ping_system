@@ -31,7 +31,6 @@ import net.sam.ping_system.sound.PingSound;
 public class ClientPacketHandler {
     public static void handleS2CPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, int r, int g, int b, boolean isAlternative, int acknowledgerId, int selectedId) {
 
-        System.out.println("handlepingpacket");
         //if remove ping packet
         if(isAlternative){
             for(Ping p: PingHandler.pingList){
@@ -70,7 +69,6 @@ public class ClientPacketHandler {
             }
             return;
         }
-        System.out.println("normal packet");
         //if normal ping packet
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
@@ -87,24 +85,17 @@ public class ClientPacketHandler {
 
         if(sender instanceof Player p){
             String message;
-            System.out.println("string message");
             if(selectedId != -1){
                 Entity entity = level.getEntity(selectedId);
-                System.out.println("entity entity");
                 if(entity.getCustomName() != null){
-                    System.out.println("not null");
                     message = String.format("%s - %s", p.getName().getString(),entity.getCustomName().getString());
                 }else{
-                    System.out.println("not not null");
                     message = String.format("%s - %s", p.getName().getString(),entity.getType().getDescription().getString());
-                    System.out.println(message);
                 }
             } else if(blockPos.getY() != 10000){
-                System.out.println("not 10000");
                 String blockName = level.getBlockState(blockPos).getBlock().getName().getString();
                 message = String.format("%s - %s", p.getName().getString(), blockName);
             } else{
-                System.out.println("else");
                 message = String.format("%s", p.getName().getString());
             }
 
@@ -123,7 +114,6 @@ public class ClientPacketHandler {
             }
             player.sendSystemMessage(Component.literal(message).withStyle(teamColor));
         }
-        System.out.println("before newping");
         PingHandler.newPing(senderId, type, x,y,z,r,g,b, blockPos, team, selectedId);
 
         //Play ping sound

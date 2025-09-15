@@ -89,7 +89,6 @@ public class PingHandler {
     private static float edgePixels = 128.0f;
 
     public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b, BlockPos blockPos, Team team, int attachedId){
-        System.out.println("newping");
         Ping ping = new Ping(playerId,type,x,y,z,r,g,b, blockPos, team, attachedId);
         pingList.add(ping);
         if(pingList.size() > maxPings){
@@ -290,7 +289,6 @@ public class PingHandler {
 
     public static void removePing(int playerId, int type, double x, double y, double z){
         BlockPos temp = new BlockPos(0,0,0);
-        System.out.println("remove");
         ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, -1, -1));
     }
 
@@ -302,7 +300,6 @@ public class PingHandler {
         timeSinceLastPing = 0.0;
 
         BlockPos temp = new BlockPos(0,0,0);
-        System.out.println("acknowledge");
         ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, Minecraft.getInstance().player.getId(), -1));
     }
 
@@ -364,7 +361,6 @@ public class PingHandler {
         );
 
         if (entityHit != null) {
-            System.out.println("entity");
             Entity target = entityHit.getEntity();
             hitPos = new BlockPos(0,10000,0);
             ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, target.getX(), target.getY(), target.getZ(), hitPos, false, -1, target.getId()));
