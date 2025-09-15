@@ -19,8 +19,9 @@ public class C2SRequestToPingPacket {
     private final BlockPos blockPos;
     private final boolean isAlternative;
     private final int acknowledgerId;
+    private final int selectedId;
 
-    public C2SRequestToPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, boolean isAlternative, int acknowledgerId) {
+    public C2SRequestToPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, boolean isAlternative, int acknowledgerId, int selectedId) {
         this.senderId = senderId;
         this.type = type;
         this.x = x;
@@ -29,6 +30,7 @@ public class C2SRequestToPingPacket {
         this.blockPos = blockPos;
         this.isAlternative = isAlternative;
         this.acknowledgerId = acknowledgerId;
+        this.selectedId = selectedId;
     }
 
     public static void encode(C2SRequestToPingPacket pkt, FriendlyByteBuf buf) {
@@ -40,17 +42,18 @@ public class C2SRequestToPingPacket {
         buf.writeBlockPos(pkt.blockPos);
         buf.writeBoolean(pkt.isAlternative);
         buf.writeInt(pkt.acknowledgerId);
+        buf.writeInt(pkt.selectedId);
     }
 
 
     public static C2SRequestToPingPacket decode(FriendlyByteBuf buf) {
-        return new C2SRequestToPingPacket(buf.readInt(), buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBlockPos(), buf.readBoolean(), buf.readInt());
+        return new C2SRequestToPingPacket(buf.readInt(), buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBlockPos(), buf.readBoolean(), buf.readInt(), buf.readInt());
     }
 
     public static void handle(C2SRequestToPingPacket pkt, Supplier<NetworkEvent.Context> ctx) {
 
         ctx.get().enqueueWork(() -> {
-                    ServerPacketHandler.handleC2SRequestToPingPacket(pkt.senderId, pkt.type, pkt.x, pkt.y, pkt.z, pkt.blockPos, ctx, pkt.isAlternative, pkt.acknowledgerId);
+                    ServerPacketHandler.handleC2SRequestToPingPacket(pkt.senderId, pkt.type, pkt.x, pkt.y, pkt.z, pkt.blockPos, ctx, pkt.isAlternative, pkt.acknowledgerId, pkt.selectedId);
         });
         ctx.get().setPacketHandled(true);
     }

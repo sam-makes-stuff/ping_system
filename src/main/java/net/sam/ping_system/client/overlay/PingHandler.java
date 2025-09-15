@@ -13,14 +13,13 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.*;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiEvent;
@@ -89,8 +88,9 @@ public class PingHandler {
 
     private static float edgePixels = 128.0f;
 
-    public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b, BlockPos blockPos, Team team){
-        Ping ping = new Ping(playerId,type,x,y,z,r,g,b, blockPos, team);
+    public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b, BlockPos blockPos, Team team, int attachedId){
+        System.out.println("newping");
+        Ping ping = new Ping(playerId,type,x,y,z,r,g,b, blockPos, team, attachedId);
         pingList.add(ping);
         if(pingList.size() > maxPings){
             pingList.remove(0);
@@ -164,7 +164,7 @@ public class PingHandler {
         float minDist = Float.POSITIVE_INFINITY;
 
         for(Ping p : pingList){
-            p.tick();
+            p.tick(event.getPartialTick());
             Vec3 pos = new Vec3(p.x, p.y, p.z);
             Vector4f pos4f = CustomHudRenderer.worldToScreenTransform(pos);
             Vec2 screenRenderPos = CustomHudRenderer.worldToScreenWithEdgeClip(pos4f, edgePixels);
@@ -291,7 +291,7 @@ public class PingHandler {
     public static void removePing(int playerId, int type, double x, double y, double z){
         BlockPos temp = new BlockPos(0,0,0);
         System.out.println("remove");
-        ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, -1));
+        ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, -1, -1));
     }
 
     public static void acknowledgePing(int playerId, int type, double x, double y, double z){
@@ -303,7 +303,7 @@ public class PingHandler {
 
         BlockPos temp = new BlockPos(0,0,0);
         System.out.println("acknowledge");
-        ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, Minecraft.getInstance().player.getId()));
+        ModPackets.sendToServer(new C2SRequestToPingPacket(playerId, type, x, y, z, temp, true, Minecraft.getInstance().player.getId(), -1));
     }
 
 
@@ -343,16 +343,36 @@ public class PingHandler {
             ));
         }
 
+        //do block raycast then entity raycast
+        BlockPos hitPos = new BlockPos(0,10000,0);
+        if(hitResult.getType() != HitResult.Type.MISS){
+            hitPos = hitResult.getBlockPos();
+            end = hitResult.getLocation();
+        }
 
+        AABB searchBox = player.getBoundingBox()
+                .expandTowards(look.scale(distance))
+                .inflate(1.0); // extra padding
 
-        if(hitResult.getType() == HitResult.Type.MISS){return;}
-        else{
-            BlockPos blockPos = hitResult.getBlockPos();
-            Vec3 pos = hitResult.getLocation();
-            double x = pos.x();
-            double y = pos.y();
-            double z = pos.z();
-            ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, x, y, z, blockPos, false, -1));
+        EntityHitResult entityHit = ProjectileUtil.getEntityHitResult(
+                player,
+                eyePos,
+                end,
+                searchBox,
+                e -> !e.isSpectator() && e.isAlive(), // filter
+                distance * distance
+        );
+
+        if (entityHit != null) {
+            System.out.println("entity");
+            Entity target = entityHit.getEntity();
+            hitPos = new BlockPos(0,10000,0);
+            ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, target.getX(), target.getY(), target.getZ(), hitPos, false, -1, target.getId()));
+        }else{
+            if(hitPos.getY() != 10000){
+                ModPackets.sendToServer(new C2SRequestToPingPacket(mc.player.getId(), type, end.x, end.y, end.z, hitPos, false, -1, -1));
+            }
+
         }
     }
 }

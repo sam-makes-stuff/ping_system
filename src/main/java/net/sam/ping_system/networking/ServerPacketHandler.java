@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 public class ServerPacketHandler {
 
 
-    public static void handleC2SRequestToPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos,Supplier<NetworkEvent.Context> ctx, boolean isAlternative, int acknowledgerId) {
+    public static void handleC2SRequestToPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos,Supplier<NetworkEvent.Context> ctx, boolean isAlternative, int acknowledgerId, int selectedId) {
         ServerPlayer sender = ctx.get().getSender();
         List<ServerPlayer> players = sender.serverLevel().players();
         Team senderTeam = sender.getTeam();
@@ -29,7 +29,7 @@ public class ServerPacketHandler {
             g = (colorInt >> 8)  & 0xFF;
             b = (colorInt)       & 0xFF;
         }
-        S2CSendPingPacket sendPingPacket = new S2CSendPingPacket(senderId, type, x, y, z, blockPos, r, g, b, isAlternative, acknowledgerId);
+        S2CSendPingPacket sendPingPacket = new S2CSendPingPacket(senderId, type, x, y, z, blockPos, r, g, b, isAlternative, acknowledgerId, selectedId);
         for(ServerPlayer p: players){
             if(p.getTeam() == senderTeam || (p.getTeam() == null && senderTeam == null)){
                 ModPackets.sendToPlayer(p, sendPingPacket);
