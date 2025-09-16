@@ -11,12 +11,16 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -28,7 +32,14 @@ import net.sam.ping_system.client.overlay.PingHandler;
 import net.sam.ping_system.sound.ModSounds;
 import net.sam.ping_system.sound.PingSound;
 
+
 public class ClientPacketHandler {
+
+    public static Style goStyle = Style.EMPTY.withColor(TextColor.fromRgb(0x79AC03));
+    public static Style attackStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xF5BB00));
+    public static Style dangerStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xBF3100));
+    public static Style breakStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xB8B8F3));
+
     public static void handleS2CPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, int r, int g, int b, boolean isAlternative, int acknowledgerId, int selectedId) {
 
         //if remove ping packet
@@ -84,19 +95,22 @@ public class ClientPacketHandler {
         }
 
         if(sender instanceof Player p){
-            String message;
+            MutableComponent message = Component.literal(p.getName().getString()).withStyle(teamColor);
             if(selectedId != -1){
                 Entity entity = level.getEntity(selectedId);
-                if(entity.getCustomName() != null){
-                    message = String.format("%s - %s", p.getName().getString(),entity.getCustomName().getString());
-                }else{
-                    message = String.format("%s - %s", p.getName().getString(),entity.getType().getDescription().getString());
+                if(entity instanceof ItemEntity ie){
+                    message.append(Component.literal(String.format(" - Item (%s)",ie.getDisplayName().getString())).withStyle(ChatFormatting.WHITE));
+                }else {
+                    if(entity.getCustomName() != null){
+                        message.append(Component.literal(String.format(" - %s",entity.getCustomName().getString())).withStyle(ChatFormatting.WHITE));
+                    }else{
+                        message.append(Component.literal(String.format(" - %s",entity.getDisplayName().getString())).withStyle(ChatFormatting.WHITE));
+                    }
                 }
+
             } else if(blockPos.getY() != 10000){
                 String blockName = level.getBlockState(blockPos).getBlock().getName().getString();
-                message = String.format("%s - %s", p.getName().getString(), blockName);
-            } else{
-                message = String.format("%s", p.getName().getString());
+                message.append(Component.literal(String.format(" - %s", blockName)).withStyle(ChatFormatting.WHITE));
             }
 
 
@@ -104,15 +118,15 @@ public class ClientPacketHandler {
 
 
             if(type == 1){
-                message += " (GO)";
+                message.append(Component.literal(" (GO)").setStyle(goStyle).withStyle(ChatFormatting.BOLD));
             } else if (type == 2) {
-                message += " (ATTACK)";
+                message.append(Component.literal(" (ATTACK)").setStyle(attackStyle).withStyle(ChatFormatting.BOLD));
             }else if (type == 3) {
-                message += " (DANGER)";
+                message.append(Component.literal(" (DANGER)").setStyle(dangerStyle).withStyle(ChatFormatting.BOLD));
             }else if (type == 4) {
-                message += " (BREAK)";
+                message.append(Component.literal(" (BREAK)").setStyle(breakStyle).withStyle(ChatFormatting.BOLD));
             }
-            player.sendSystemMessage(Component.literal(message).withStyle(teamColor));
+            player.sendSystemMessage(message);
         }
         PingHandler.newPing(senderId, type, x,y,z,r,g,b, blockPos, team, selectedId);
 
