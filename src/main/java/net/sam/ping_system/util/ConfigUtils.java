@@ -5,6 +5,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.sam.ping_system.PingSystem;
+import net.sam.ping_system.client.overlay.PingHandler;
 import net.sam.ping_system.config.ClientConfig;
 
 
@@ -27,6 +28,7 @@ public class ConfigUtils {
     @SubscribeEvent
     public static void onModConfigLoaded(ModConfigEvent event) {
         if (event.getConfig().getSpec() == ClientConfig.SPEC) {
+            PingHandler.initFromConfig();
         }
     }
 }

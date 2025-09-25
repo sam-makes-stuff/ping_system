@@ -29,9 +29,11 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.sam.ping_system.PingSystem;
+import net.sam.ping_system.config.ClientConfig;
 import net.sam.ping_system.networking.ModPackets;
 import net.sam.ping_system.networking.packets.C2SRequestToPingPacket;
 import net.sam.ping_system.render.CustomHudRenderer;
+import net.sam.ping_system.util.ConfigUtils;
 import net.sam.ping_system.util.PartialTickUtils;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -74,8 +76,6 @@ public class PingHandler {
     private static double timeSinceLastPing = 0.0;
     private static final double pingCooldown = 12.0; //in ticks
     private static final int maxPings = 3;
-    private static final float fadeRadius = 0.4f;
-    private static final float fadeMin = 0.04f;
 
     private static final float selectRadius = 25;
 
@@ -87,7 +87,7 @@ public class PingHandler {
     public static List<Ping> pingList = new ArrayList<>();
     public static List<PingGhost> pingGhostList = new ArrayList<>();
 
-    private static float edgePixels = 128.0f;
+    private static float edgePixels;
 
     public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b, BlockPos blockPos, Team team, int attachedId) {
         Ping ping = new Ping(playerId, type, x, y, z, r, g, b, blockPos, team, attachedId);
@@ -375,6 +375,13 @@ public class PingHandler {
             }
 
         }
+    }
+
+
+    public static void initFromConfig() {
+
+        //lifetime = ConfigUtils.getOrDefault(ClientConfig.NUMBER_DURATION);
+        edgePixels = ConfigUtils.getOrDefault(ClientConfig.PING_EDGE_PIXELS);
     }
 
 
