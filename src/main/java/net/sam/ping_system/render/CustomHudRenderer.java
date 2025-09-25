@@ -82,8 +82,8 @@ public class CustomHudRenderer {
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
         double guiScale = mc.getWindow().getGuiScale();
-        double scaledX = (x / guiScale);
-        double scaledY = (y / guiScale);
+        double scaledX = (x);
+        double scaledY = (y);
 
         int textWidth = font.width(text);
         int textHeight = font.lineHeight;
@@ -120,8 +120,10 @@ public class CustomHudRenderer {
             poseStack.scale(scale, scale, 1.0f);
         }
 
+        if(stack != null){
+            gg.renderItem(stack, 0,0);
+        }
 
-        gg.renderItem(stack, 0,0);
         RenderSystem.disableBlend();
 
         poseStack.popPose();

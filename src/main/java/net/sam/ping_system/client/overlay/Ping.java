@@ -6,6 +6,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
@@ -26,7 +27,7 @@ public class Ping{
     public int attachedId;
 
     private BlockPos blockPos;
-    public ItemStack blockStack = null;
+    public ItemStack itemStack = null;
 
     public int type;
     public float age = 0f;
@@ -47,10 +48,18 @@ public class Ping{
         this.attachedId = attachedId;
 
         //No block hit or attached to entity
-        if(blockPos.getY() != 10000){
+
+        if(attachedId != -1) {
+            Minecraft mc = Minecraft.getInstance();
+            Entity entity = mc.player.level().getEntity(attachedId);
+            if(entity instanceof ItemEntity ie){
+                this.itemStack = ie.getItem();
+            }
+        }
+        else if(blockPos.getY() != 10000){
             Minecraft mc = Minecraft.getInstance();
             Block block = mc.player.level().getBlockState(blockPos).getBlock();
-            this.blockStack = new ItemStack(block);
+            this.itemStack = new ItemStack(block);
         }
 
 

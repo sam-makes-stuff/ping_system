@@ -19,9 +19,9 @@ public class ServerPacketHandler {
         Team senderTeam = sender.getTeam();
         int r,g,b;
         if(senderTeam == null){
-            r = 0;
-            g = 0;
-            b = 0;
+            r = 255;
+            g = 255;
+            b = 255;
         }else{
             ChatFormatting color = senderTeam.getColor();
             int colorInt = color.getColor().intValue();
