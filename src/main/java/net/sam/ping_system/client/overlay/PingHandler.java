@@ -226,7 +226,10 @@ public class PingHandler {
                     CustomHudRenderer.renderCustomHudObject(ARROW_0, x, y, 12, 12, 1, arrowRotation, 255, 255, 255, 255);
 
                 }
-                CustomHudRenderer.renderCustomHudObject(ARROW_OUTLINE, x, y, 12, 12, 1, arrowRotation, p.r, p.g, p.b, 255);
+                if(p.team != null){
+                    CustomHudRenderer.renderCustomHudObject(ARROW_OUTLINE, x, y, 14, 14, 1, arrowRotation, p.r, p.g, p.b, 255);
+                }
+
 
 
                 CustomHudRenderer.renderText(event.getGuiGraphics(),String.format("%.1fm", worldDist), x, y + 16, p.r,p.g,p.b,255,1.0f,0.0f);
