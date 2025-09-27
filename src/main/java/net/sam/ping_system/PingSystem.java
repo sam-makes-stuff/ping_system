@@ -12,6 +12,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.sam.ping_system.config.ClientConfig;
+import net.sam.ping_system.config.ServerConfig;
 import net.sam.ping_system.networking.ModPackets;
 import net.sam.ping_system.sound.ModSounds;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class PingSystem
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC, "ping_system-client.toml");
-
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, "ping_system-server.toml");
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

@@ -33,6 +33,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.sam.ping_system.PingSystem;
 import net.sam.ping_system.config.ClientConfig;
+import net.sam.ping_system.config.ServerConfig;
 import net.sam.ping_system.networking.ModPackets;
 import net.sam.ping_system.networking.packets.C2SRequestToPingPacket;
 import net.sam.ping_system.render.CustomHudRenderer;
@@ -77,8 +78,6 @@ public class PingHandler {
     private static final int PING_SIZE_PIXELS = 7;
     private static final double distance = 512.0;
     private static double timeSinceLastPing = 0.0;
-    private static final double pingCooldown = 12.0; //in ticks
-    private static final int maxPings = 3;
 
     private static final float selectRadius = 25;
 
@@ -92,6 +91,8 @@ public class PingHandler {
 
     private static float edgePixels;
     private static float sizeMult;
+    private static int maxPings;
+    private static double pingCooldown;
 
     public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b, BlockPos blockPos, Team team, int attachedId) {
         Ping ping = new Ping(playerId, type, x, y, z, r, g, b, blockPos, team, attachedId);
@@ -391,6 +392,8 @@ public class PingHandler {
         //lifetime = ConfigUtils.getOrDefault(ClientConfig.NUMBER_DURATION);
         edgePixels = ConfigUtils.getOrDefault(ClientConfig.PING_EDGE_PIXELS);
         sizeMult = ConfigUtils.getOrDefault(ClientConfig.PING_SCALE_MULT);
+        maxPings = ConfigUtils.getOrDefault(ServerConfig.MAX_PINGS);
+        pingCooldown = ConfigUtils.getOrDefault(ServerConfig.PING_COOLDOWN);
     }
 
 
