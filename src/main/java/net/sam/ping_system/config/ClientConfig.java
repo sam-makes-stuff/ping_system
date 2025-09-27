@@ -13,7 +13,7 @@ public class ClientConfig {
     static {
         BUILDER.push("Config for Ping System");
 
-        PING_SCALE_MULT = BUILDER.comment("Scale multiplier for pings (pings also still scale with gui scale) DEFAULT: 1.0").define("ping_scale_mult", 4.0f);
+        PING_SCALE_MULT = BUILDER.comment("Scale multiplier for pings (pings also still scale with gui scale) DEFAULT: 1.0").define("ping_scale_mult", 1.0f);
         PING_EDGE_PIXELS = BUILDER.comment("Ping distance from screen border when locked to edge DEFAULT: 128.0").define("ping_edge_pixels", 128.0f);
 
         BUILDER.pop();

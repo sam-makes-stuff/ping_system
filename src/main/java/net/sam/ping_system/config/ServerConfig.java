@@ -9,12 +9,17 @@ public class ServerConfig {
 
     public static final ForgeConfigSpec.ConfigValue<Integer> MAX_PINGS;
     public static final ForgeConfigSpec.ConfigValue<Double> PING_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> TRACK_MOBS;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> TRACK_PLAYERS;
 
     static {
         BUILDER.push("Config for Ping System");
 
         MAX_PINGS = BUILDER.comment("Maximum pings per player DEFAULT: 3").define("max_pings", 3);
-        PING_COOLDOWN = BUILDER.comment("Minimum time between pings (in ticks) DEFAULT: 12").define("ping_cooldown", 1.0);
+        PING_COOLDOWN = BUILDER.comment("Minimum time between pings (in ticks) DEFAULT: 12").define("ping_cooldown", 12.0);
+
+        TRACK_MOBS = BUILDER.comment("Should pings follow mobs DEFAULT: true").define("track_mobs", true);
+        TRACK_PLAYERS = BUILDER.comment("Should pings follow players DEFAULT: true").define("track_players", true);
 
         BUILDER.pop();
         SPEC = BUILDER.build();

@@ -6,11 +6,16 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
+import net.sam.ping_system.config.ClientConfig;
+import net.sam.ping_system.config.ServerConfig;
+import net.sam.ping_system.util.ConfigUtils;
 import net.sam.ping_system.util.PartialTickUtils;
 
 public class Ping{
@@ -25,6 +30,9 @@ public class Ping{
     public boolean toRemove = false;
     public Team team;
     public int attachedId;
+
+    public static boolean shouldTrackMob;
+    public static boolean shouldTrackPlayer;
 
     private BlockPos blockPos;
     public ItemStack itemStack = null;
@@ -76,8 +84,18 @@ public class Ping{
 
     public void followAttached(float partialTicks){
         if(this.attachedId != -1){
+
+
             Minecraft mc = Minecraft.getInstance();
             Entity attachedTo = mc.level.getEntity(attachedId);
+
+            if(attachedTo instanceof Player && !shouldTrackPlayer){
+                return;
+            }
+
+            if(attachedTo instanceof LivingEntity && !(attachedTo instanceof Player) && !shouldTrackMob){
+                return;
+            }
 
             if(attachedTo == null || !attachedTo.isAlive()){
                 this.toRemove = true;
@@ -89,4 +107,12 @@ public class Ping{
             }
         }
     }
+
+    public static void initFromConfig() {
+
+        //lifetime = ConfigUtils.getOrDefault(ClientConfig.NUMBER_DURATION);
+        shouldTrackMob = ConfigUtils.getOrDefault(ServerConfig.TRACK_MOBS);
+        shouldTrackPlayer = ConfigUtils.getOrDefault(ServerConfig.TRACK_PLAYERS);
+    }
+
 }
