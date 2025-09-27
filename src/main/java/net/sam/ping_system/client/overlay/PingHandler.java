@@ -273,7 +273,7 @@ public class PingHandler {
                     CustomHudRenderer.renderCustomHudObject(PING_0, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, sizeMult, 0, 255, 255, 255, alpha);
                     CustomHudRenderer.renderCustomHudObject(BASIC_PING, x, y - (16f * sizeMult), 16, 16, sizeMult, 0, 255, 255, 255, alpha);
                     if (p.team != null) {
-                        CustomHudRenderer.renderCustomHudObject(BASIC_OUTLINE, x, y - (16f * sizeMult), 18, 18, 1, 0, p.r, p.g, p.b, alpha);
+                        CustomHudRenderer.renderCustomHudObject(BASIC_OUTLINE, x, y - (16f * sizeMult), 18, 18, sizeMult, 0, p.r, p.g, p.b, alpha);
                     }
                 }
                 if (p.team != null) {
