@@ -117,7 +117,9 @@ public class CustomHudRenderer {
         }
 
         if (scale != 1.0f) {
+            poseStack.translate(8, 8, 0);
             poseStack.scale(scale, scale, 1.0f);
+            poseStack.translate(-8, -8, 0);
         }
 
         if(stack != null){

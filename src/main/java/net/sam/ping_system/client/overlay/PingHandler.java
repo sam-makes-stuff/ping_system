@@ -24,7 +24,10 @@ import net.minecraft.world.phys.*;
 import net.minecraft.world.scores.Team;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -88,6 +91,7 @@ public class PingHandler {
     public static List<PingGhost> pingGhostList = new ArrayList<>();
 
     private static float edgePixels;
+    private static float sizeMult;
 
     public static void newPing(int playerId, int type, double x, double y, double z, int r, int g, int b, BlockPos blockPos, Team team, int attachedId) {
         Ping ping = new Ping(playerId, type, x, y, z, r, g, b, blockPos, team, attachedId);
@@ -128,6 +132,7 @@ public class PingHandler {
         pingList = tempPing;
         pingGhostList = tempPingGhost;
     }
+
 
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Pre event) {
@@ -209,75 +214,75 @@ public class PingHandler {
                 float offsetX = offset * -Mth.sin(arrowRotation * (Mth.PI / 180));
                 float offsetY = offset * Mth.cos(arrowRotation * (Mth.PI / 180));
 
-                CustomHudRenderer.renderItemSprite(p.itemStack, x + offsetX, y + offsetY, 1.0f, 0.0f, 255);
+                CustomHudRenderer.renderItemSprite(p.itemStack, x + (offsetX * sizeMult), y + (offsetY * sizeMult), sizeMult, 0.0f, 255);
                 if (p.type == 1) {
-                    CustomHudRenderer.renderCustomHudObject(ARROW_1, x, y, 12, 12, 1, arrowRotation, 255, 255, 255, 255);
+                    CustomHudRenderer.renderCustomHudObject(ARROW_1, x, y, 12, 12, sizeMult, arrowRotation, 255, 255, 255, 255);
                     //CustomHudRenderer.renderCustomHudObject(MOVE_PING,x + offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 } else if (p.type == 2) {
-                    CustomHudRenderer.renderCustomHudObject(ARROW_2, x, y, 12, 12, 1, arrowRotation, 255, 255, 255, 255);
+                    CustomHudRenderer.renderCustomHudObject(ARROW_2, x, y, 12, 12, sizeMult, arrowRotation, 255, 255, 255, 255);
                     //CustomHudRenderer.renderCustomHudObject(ATTACK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 } else if (p.type == 3) {
-                    CustomHudRenderer.renderCustomHudObject(ARROW_3, x, y, 12, 12, 1, arrowRotation, 255, 255, 255, 255);
+                    CustomHudRenderer.renderCustomHudObject(ARROW_3, x, y, 12, 12, sizeMult, arrowRotation, 255, 255, 255, 255);
                     //CustomHudRenderer.renderCustomHudObject(DANGER_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 } else if (p.type == 4) {
-                    CustomHudRenderer.renderCustomHudObject(ARROW_4, x, y, 12, 12, 1, arrowRotation, 255, 255, 255, 255);
+                    CustomHudRenderer.renderCustomHudObject(ARROW_4, x, y, 12, 12, sizeMult, arrowRotation, 255, 255, 255, 255);
                     //CustomHudRenderer.renderCustomHudObject(BREAK_PING,x+ offsetX, y + offsetY, 16,16,1,0,255,255,255,255);
                 } else {
-                    CustomHudRenderer.renderCustomHudObject(ARROW_0, x, y, 12, 12, 1, arrowRotation, 255, 255, 255, 255);
+                    CustomHudRenderer.renderCustomHudObject(ARROW_0, x, y, 12, 12, sizeMult, arrowRotation, 255, 255, 255, 255);
 
                 }
                 if(p.team != null){
-                    CustomHudRenderer.renderCustomHudObject(ARROW_OUTLINE, x, y, 14, 14, 1, arrowRotation, p.r, p.g, p.b, 255);
+                    CustomHudRenderer.renderCustomHudObject(ARROW_OUTLINE, x, y, 14, 14, sizeMult, arrowRotation, p.r, p.g, p.b, 255);
                 }
 
 
 
-                CustomHudRenderer.renderText(event.getGuiGraphics(),String.format("%.1fm", worldDist), x, y + 16, p.r,p.g,p.b,255,1.0f,0.0f);
+                CustomHudRenderer.renderText(event.getGuiGraphics(),String.format("%.1fm", worldDist), x, y + (16 * sizeMult), p.r,p.g,p.b,255,sizeMult,0.0f);
 
             } else { //if on screen
 
                 int alpha = 255;
 
-                CustomHudRenderer.renderItemSprite(p.itemStack, x + 16, y, 1.0f, 0.0f, alpha);
+                CustomHudRenderer.renderItemSprite(p.itemStack, x + (16 * sizeMult), y, sizeMult, 0.0f, alpha);
                 if (p.type == 1) {
-                    CustomHudRenderer.renderCustomHudObject(PING_1, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, 1, 0, 255, 255, 255, alpha);
-                    CustomHudRenderer.renderCustomHudObject(MOVE_PING, x, y - 20f, 20, 20, 1, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_1, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, sizeMult, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(MOVE_PING, x, y - (20f * sizeMult), 20, 20, sizeMult, 0, 255, 255, 255, alpha);
                     if (p.team != null) {
-                        CustomHudRenderer.renderCustomHudObject(MOVE_OUTLINE, x, y - 20f, 22, 22, 1, 0, p.r, p.g, p.b, alpha);
+                        CustomHudRenderer.renderCustomHudObject(MOVE_OUTLINE, x, y - (20f * sizeMult), 22, 22, sizeMult, 0, p.r, p.g, p.b, alpha);
                     }
                 } else if (p.type == 2) {
-                    CustomHudRenderer.renderCustomHudObject(PING_2, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, 1, 0, 255, 255, 255, alpha);
-                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING, x, y - 16f, 18, 16, 1, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_2, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, sizeMult, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(ATTACK_PING, x, y - (16f * sizeMult), 18, 16, sizeMult, 0, 255, 255, 255, alpha);
                     if (p.team != null) {
-                        CustomHudRenderer.renderCustomHudObject(ATTACK_OUTLINE, x, y - 16f, 20, 18, 1, 0, p.r, p.g, p.b, alpha);
+                        CustomHudRenderer.renderCustomHudObject(ATTACK_OUTLINE, x, y - (16f * sizeMult), 20, 18, sizeMult, 0, p.r, p.g, p.b, alpha);
                     }
                 } else if (p.type == 3) {
-                    CustomHudRenderer.renderCustomHudObject(PING_3, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, 1, 0, 255, 255, 255, alpha);
-                    CustomHudRenderer.renderCustomHudObject(DANGER_PING, x, y - 18f, 20, 18, 1, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_3, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, sizeMult, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(DANGER_PING, x, y - (18f * sizeMult), 20, 18, sizeMult, 0, 255, 255, 255, alpha);
                     if (p.team != null) {
-                        CustomHudRenderer.renderCustomHudObject(DANGER_OUTLINE, x, y - 18f, 22, 20, 1, 0, p.r, p.g, p.b, alpha);
+                        CustomHudRenderer.renderCustomHudObject(DANGER_OUTLINE, x, y - (18f * sizeMult), 22, 20, sizeMult, 0, p.r, p.g, p.b, alpha);
                     }
                 } else if (p.type == 4) {
-                    CustomHudRenderer.renderCustomHudObject(PING_4, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, 1, 0, 255, 255, 255, alpha);
-                    CustomHudRenderer.renderCustomHudObject(BREAK_PING, x, y - 13f, 13, 13, 1, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_4, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, sizeMult, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(BREAK_PING, x, y - (13f * sizeMult), 13, 13, sizeMult, 0, 255, 255, 255, alpha);
                     if (p.team != null) {
-                        CustomHudRenderer.renderCustomHudObject(BREAK_OUTLINE, x, y - 13f, 15, 15, 1, 0, p.r, p.g, p.b, alpha);
+                        CustomHudRenderer.renderCustomHudObject(BREAK_OUTLINE, x, y - (13f * sizeMult), 15, 15, sizeMult, 0, p.r, p.g, p.b, alpha);
                     }
                 } else {
-                    CustomHudRenderer.renderCustomHudObject(PING_0, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, 1, 0, 255, 255, 255, alpha);
-                    CustomHudRenderer.renderCustomHudObject(BASIC_PING, x, y - 16f, 16, 16, 1, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_0, x, y, PING_SIZE_PIXELS, PING_SIZE_PIXELS, sizeMult, 0, 255, 255, 255, alpha);
+                    CustomHudRenderer.renderCustomHudObject(BASIC_PING, x, y - (16f * sizeMult), 16, 16, sizeMult, 0, 255, 255, 255, alpha);
                     if (p.team != null) {
-                        CustomHudRenderer.renderCustomHudObject(BASIC_OUTLINE, x, y - 16f, 18, 18, 1, 0, p.r, p.g, p.b, alpha);
+                        CustomHudRenderer.renderCustomHudObject(BASIC_OUTLINE, x, y - (16f * sizeMult), 18, 18, 1, 0, p.r, p.g, p.b, alpha);
                     }
                 }
                 if (p.team != null) {
-                    CustomHudRenderer.renderCustomHudObject(PING_OUTLINE, x, y, PING_SIZE_PIXELS + 2, PING_SIZE_PIXELS + 2, 1, 0, p.r, p.g, p.b, alpha);
+                    CustomHudRenderer.renderCustomHudObject(PING_OUTLINE, x, y, PING_SIZE_PIXELS + 2, PING_SIZE_PIXELS + 2, sizeMult, 0, p.r, p.g, p.b, alpha);
                 }
 
                 if (p.isSelected) {
-                    CustomHudRenderer.renderCustomHudObject(PING_OUTLINE, x, y, PING_SIZE_PIXELS + 2, PING_SIZE_PIXELS + 2, 1, 0.0f, 255, 255, 255, 255);
+                    CustomHudRenderer.renderCustomHudObject(PING_OUTLINE, x, y, PING_SIZE_PIXELS + 2, PING_SIZE_PIXELS + 2, sizeMult, 0.0f, 255, 255, 255, 255);
                 }
-                CustomHudRenderer.renderText(event.getGuiGraphics(),String.format("%.1fm", worldDist), x, y + 16, p.r,p.g,p.b,255,1.0f,0.0f);
+                CustomHudRenderer.renderText(event.getGuiGraphics(),String.format("%.1fm", worldDist), x, y + (16f * sizeMult), p.r,p.g,p.b,255,sizeMult,0.0f);
             }
         }
         pingList.forEach((p) -> p.isSelected = false);
@@ -385,6 +390,7 @@ public class PingHandler {
 
         //lifetime = ConfigUtils.getOrDefault(ClientConfig.NUMBER_DURATION);
         edgePixels = ConfigUtils.getOrDefault(ClientConfig.PING_EDGE_PIXELS);
+        sizeMult = ConfigUtils.getOrDefault(ClientConfig.PING_SCALE_MULT);
     }
 
 
