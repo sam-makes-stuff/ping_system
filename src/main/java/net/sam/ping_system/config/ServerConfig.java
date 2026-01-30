@@ -19,7 +19,7 @@ public class ServerConfig {
         PING_COOLDOWN = BUILDER.comment("Minimum time between pings (in ticks) DEFAULT: 12").define("ping_cooldown", 12.0);
 
         TRACK_MOBS = BUILDER.comment("Should pings follow mobs DEFAULT: true").define("track_mobs", true);
-        TRACK_PLAYERS = BUILDER.comment("Should pings follow players DEFAULT: true").define("track_players", true);
+        TRACK_PLAYERS = BUILDER.comment("Should pings follow players DEFAULT: false").define("track_players", false);
 
         BUILDER.pop();
         SPEC = BUILDER.build();

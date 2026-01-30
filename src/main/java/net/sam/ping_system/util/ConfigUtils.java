@@ -8,6 +8,8 @@ import net.sam.ping_system.PingSystem;
 import net.sam.ping_system.client.overlay.Ping;
 import net.sam.ping_system.client.overlay.PingHandler;
 import net.sam.ping_system.config.ClientConfig;
+import net.sam.ping_system.config.ServerConfig;
+import net.sam.ping_system.networking.ServerPacketHandler;
 
 
 @Mod.EventBusSubscriber(modid = PingSystem.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -31,6 +33,10 @@ public class ConfigUtils {
         if (event.getConfig().getSpec() == ClientConfig.SPEC) {
             PingHandler.initFromConfig();
             Ping.initFromConfig();
+        }
+
+        if (event.getConfig().getSpec() == ServerConfig.SPEC) {
+            ServerPacketHandler.initFromConfig();
         }
     }
 }

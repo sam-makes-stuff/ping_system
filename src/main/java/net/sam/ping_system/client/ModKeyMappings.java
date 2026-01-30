@@ -16,7 +16,7 @@ public class ModKeyMappings {
     public static final String KEY_CATEGORY = "key.categories." + PingSystem.MOD_ID;
     public static final String KEY_PING_KEY = "key." + PingSystem.MOD_ID +".pingKey";
 
-    public static final KeyMapping PING_KEY = new KeyMapping(KEY_PING_KEY, KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_C, KEY_CATEGORY);
+    public static final KeyMapping PING_KEY = new KeyMapping(KEY_PING_KEY, KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, KEY_CATEGORY);
 
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event){

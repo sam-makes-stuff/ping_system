@@ -67,15 +67,15 @@ public class PingWheelOverlay {
 
         currentHovered = getSliceAtMouse(mouseX,mouseY);
         if(currentHovered == 1){
-            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_1, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,2);
+            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_1, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,255);
         } else if (currentHovered == 2) {
-            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_2, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,2);
+            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_2, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,255);
         } else if (currentHovered == 3) {
-            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_3, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,2);
+            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_3, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,255);
         } else if (currentHovered == 4) {
-            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_4, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,2);
+            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_4, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,255);
         } else {
-            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_0, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,2);
+            CustomHudRenderer.renderCustomHudObject(PING_WHEEL_0, centerX, centerY, 128, 128, 1.0f,0.0f, 255,255,255,255);
         }
 
     }
