@@ -41,7 +41,7 @@ public class ClientPacketHandler {
     public static Style breakStyle = Style.EMPTY.withColor(TextColor.fromRgb(0xB8B8F3));
 
     public static void handleS2CPingPacket(int senderId, int type, double x, double y, double z, BlockPos blockPos, int r, int g, int b, boolean isAlternative, int acknowledgerId, int selectedId) {
-        System.out.println("received ping packet");
+        ////System.out.println("received ping packet");
         //if remove ping packet
         if(isAlternative){
             for(Ping p: PingHandler.pingList){
@@ -94,7 +94,7 @@ public class ClientPacketHandler {
             teamColor = ChatFormatting.WHITE;
         }
 
-        System.out.println("if sender");
+        ////System.out.println("if sender");
         if(sender instanceof Player p){
             MutableComponent message = Component.literal(p.getName().getString()).withStyle(teamColor);
             if(selectedId != -1){
@@ -102,10 +102,18 @@ public class ClientPacketHandler {
                 if(entity instanceof ItemEntity ie){
                     message.append(Component.literal(String.format(" - Item (%s)",ie.getDisplayName().getString())).withStyle(ChatFormatting.WHITE));
                 }else {
-                    if(entity.getCustomName() != null){
-                        message.append(Component.literal(String.format(" - %s",entity.getCustomName().getString())).withStyle(ChatFormatting.WHITE));
+                    ChatFormatting nameColor;
+                    if(entity instanceof Player){
+                        nameColor = entity.getTeam().getColor();
                     }else{
-                        message.append(Component.literal(String.format(" - %s",entity.getDisplayName().getString())).withStyle(ChatFormatting.WHITE));
+                        nameColor = ChatFormatting.WHITE;
+                    }
+
+                    message.append(Component.literal(" - ").withStyle(ChatFormatting.WHITE));
+                    if(entity.getCustomName() != null){
+                        message.append(Component.literal(String.format("%s",entity.getCustomName().getString())).withStyle(nameColor));
+                    }else{
+                        message.append(Component.literal(String.format("%s",entity.getDisplayName().getString())).withStyle(nameColor));
                     }
                 }
 

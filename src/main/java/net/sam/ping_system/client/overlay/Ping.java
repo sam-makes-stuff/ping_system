@@ -60,6 +60,12 @@ public class Ping{
         if(attachedId != -1) {
             Minecraft mc = Minecraft.getInstance();
             Entity entity = mc.player.level().getEntity(attachedId);
+
+            if(entity instanceof LivingEntity le){
+                this.y += le.getBbHeight() * 0.5f;
+            }
+
+
             if(entity instanceof ItemEntity ie){
                 this.itemStack = ie.getItem();
             }

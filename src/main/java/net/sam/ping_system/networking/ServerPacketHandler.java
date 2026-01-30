@@ -37,7 +37,7 @@ public class ServerPacketHandler {
         for(ServerPlayer p: players){
             if(p.getTeam() == senderTeam || (p.getTeam() == null && senderTeam == null)){
                 double dist = p.position().distanceTo(sender.position());
-                System.out.println(dist);
+                //System.out.println(dist);
                 if(dist <= 9999999){
                     ModPackets.sendToPlayer(p, sendPingPacket);
                 }
